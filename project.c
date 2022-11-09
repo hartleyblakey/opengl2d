@@ -9,19 +9,24 @@
 //#include "vmath.h"
 //next tutorial: 4
 
+int WINDOWHEIGHT = 600;
+int WINDOWWIDTH = 800;
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
+    WINDOWHEIGHT = height;
+    WINDOWWIDTH = width;
 }  
 
-struct Vertex
+typedef struct Vertex
 {
     float x;
     float y;
     float z;
-};
+}Vertex;
 
-struct Vertex Vertex(float x, float y, float z)
+Vertex New_Vertex(float x, float y, float z)
 {
     struct Vertex a;
     a.x = x;
@@ -45,32 +50,53 @@ void PERROR()
     }
 }
 
+typedef struct Player
+{
+    vec2 position;
+    int health;
+}Player;
+
+
 
 int main()
 {
-
-    vec2 a = {1,2};
-    vec2 b = {3,4};
-
-    vec2 c;
-    glm_vec2_add(a,b,c);
-
-    printf("%f %f\n",a[0],a[1]);
+    Player player;
+    player.position[0] = 0;
+    player.position[1] = 0;
+    player.health = 100;
 
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    struct Vertex vertices[6];
+    Vertex square[6];
 
-    vertices[0] = Vertex(-0.5f, -0.5f * sqrt(3.0f) / 3.0f, 0.0f);
-    vertices[1] = Vertex(0.5f, -0.5f * sqrt(3) / 3, 0.0f);
-    vertices[2] = Vertex(0.0f, 0.5f * sqrt(3) * 2 / 3, 0.0f);
+    square[0] = New_Vertex(-1,-1,0);
+    square[1] = New_Vertex( 1,-1,0);
+    square[2] = New_Vertex(-1, 1,0);
 
-    vertices[3] = Vertex(-0.5f / 2, 0.5f * sqrt(3) / 6, 0.0f);
-    vertices[4] = Vertex(0.5f / 2, 0.5f * sqrt(3) / 6, 0.0f);
-    vertices[5] = Vertex(0.0f, -0.5f * sqrt(3) / 3, 0.0f);
+    square[3] = New_Vertex( 1,-1,0);
+    square[4] = New_Vertex( 1, 1,0);
+    square[5] = New_Vertex(-1, 1,0);
+    vec2 positions[8];
+
+    for(int i = 0; i < 8; i++)
+    {
+        positions[i][0] = i;
+        positions[i][1] = i;
+    }
+
+
+    Vertex vertices[6];
+
+    vertices[0] = New_Vertex(-0.5f, -0.5f * sqrt(3.0f) / 3.0f, 0.0f);
+    vertices[1] = New_Vertex(0.5f, -0.5f * sqrt(3) / 3, 0.0f);
+    vertices[2] = New_Vertex(0.0f, 0.5f * sqrt(3) * 2 / 3, 0.0f);
+
+    vertices[3] = New_Vertex(-0.5f / 2, 0.5f * sqrt(3) / 6, 0.0f);
+    vertices[4] = New_Vertex(0.5f / 2, 0.5f * sqrt(3) / 6, 0.0f);
+    vertices[5] = New_Vertex(0.0f, -0.5f * sqrt(3) / 3, 0.0f);
 
 
     GLuint indices[] =
@@ -119,10 +145,10 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
     //pass the vertices to the GPU
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(square), square, GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+   // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    //glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     //tell the gpu:
     //1. which vertex attribute slot the data from the currently bound VBO goes in
@@ -134,16 +160,25 @@ int main()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
+    GLuint positionData;
+    glGenBuffers(1, &positionData);
+    glBindBuffer(GL_ARRAY_BUFFER, positionData);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 16, positions[0], GL_STATIC_DRAW);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribDivisor(1, 1);
+
     //unbind the VAO and VBO for error checking, incase we accidentally call
     //a function that modifes the currently bound VAO or VBO
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     glfwSwapBuffers(window);
 
     int checked = 0;
-
+    //checked ++;
+    //checked --;
     while(!glfwWindowShouldClose(window))
     {
 
@@ -161,7 +196,7 @@ int main()
         glBindVertexArray(VAO);
 
         //draw the triangles
-        glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
+        glDrawArraysInstanced(GL_TRIANGLES, 0, 6, 4);
 
         //swap the buffers, showing the drawn buffer on the screen
         glfwSwapBuffers(window);
