@@ -42,7 +42,7 @@ const char* parseShader(const char* file)
   fileSize = ftell(fp);
   rewind(fp);
 
-  buffer = malloc(fileSize + 0);
+  buffer = malloc(fileSize + 1);
   if(fread(buffer, fileSize, 1, fp) != 1)
   {
     fclose(fp);
@@ -62,9 +62,25 @@ const char* parseShader(const char* file)
   return (const char*)buffer;
 }
 
+void printShaderCompilationErrors(Shader shader)
+{
+  GLint isCompiled = 0;
+  glGetShaderiv(shader, GL_COMPILE_STATUS, &isCompiled);
+  if(isCompiled == GL_FALSE)
+  {
+    int maxLength = 0;
+    glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
+    char* buffer = malloc(maxLength);
+    glGetShaderInfoLog(shader, maxLength, &maxLength, buffer);
+    printf("Shader compilation failed:\n%s\n",buffer);
+    free(buffer);
+
+  }
+}
 
 Program createProgram(char* vertex, char* fragment)
 {
+  printf("HERE?!\n");
   const char* fragSource = parseShader(fragment);
   const char* vertSource = parseShader(vertex);
 
@@ -72,13 +88,19 @@ Program createProgram(char* vertex, char* fragment)
   //printf("Vertex Shader:\n%s\n\n", vertSource);
 
   Shader vert = glCreateShader(GL_VERTEX_SHADER);
+  printf("Here?\n");
 
   glShaderSource(vert, 1, &vertSource, NULL);
   glCompileShader(vert);
+  printf("at least i made it here\n");
+  printShaderCompilationErrors(vert);
+
 
   Shader frag = glCreateShader(GL_FRAGMENT_SHADER);
   glShaderSource(frag, 1, &fragSource, NULL);
   glCompileShader(frag);
+  printShaderCompilationErrors(frag);
+
 
   Program shaderProgram = glCreateProgram();
   glAttachShader(shaderProgram, vert);
@@ -118,10 +140,12 @@ Program createSimpleProgram(char* file)
 
   glShaderSource(vert, 1, &vertSource, NULL);
   glCompileShader(vert);
-
+  printShaderCompilationErrors(vert);
+  printf("aa");
   Shader frag = glCreateShader(GL_FRAGMENT_SHADER);
   glShaderSource(frag, 1, &fragSource, NULL);
   glCompileShader(frag);
+  printShaderCompilationErrors(frag);
 
   Program shaderProgram = glCreateProgram();
   glAttachShader(shaderProgram, vert);

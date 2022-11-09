@@ -159,21 +159,21 @@ int main()
     //6. pointer to the start of the values in the array
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     GLuint positionData;
     glGenBuffers(1, &positionData);
     glBindBuffer(GL_ARRAY_BUFFER, positionData);
     glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 16, positions[0], GL_STATIC_DRAW);
+
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
     glEnableVertexAttribArray(1);
     glVertexAttribDivisor(1, 1);
-
     //unbind the VAO and VBO for error checking, incase we accidentally call
     //a function that modifes the currently bound VAO or VBO
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
     //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
     glfwSwapBuffers(window);
 
     int checked = 0;
@@ -186,23 +186,21 @@ int main()
 
         glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-
-        PERROR();
+     //use these verticies and attributes for the next draw calls
+        glBindVertexArray(VAO);
 
         //use this shader program for the next draw calls
         glUseProgram(shaderProgram);
 
-        //use these verticies and attributes for the next draw calls
-        glBindVertexArray(VAO);
 
         //draw the triangles
-        glDrawArraysInstanced(GL_TRIANGLES, 0, 6, 4);
+        glDrawArraysInstanced(GL_TRIANGLES, 0, 6, 8);
 
         //swap the buffers, showing the drawn buffer on the screen
         glfwSwapBuffers(window);
 
         glfwPollEvents();
-
+        PERROR();
         checked = 1;
     }
     glDeleteVertexArrays(1, &VAO);
