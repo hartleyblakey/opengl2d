@@ -5,6 +5,8 @@
 #include "GLFW/glfw3.h"
 
 #include "shader.h"
+#include "cglm/cglm.h"
+//#include "vmath.h"
 //next tutorial: 4
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -46,6 +48,15 @@ void PERROR()
 
 int main()
 {
+
+    vec2 a = {1,2};
+    vec2 b = {3,4};
+
+    vec2 c;
+    glm_vec2_add(a,b,c);
+
+    printf("%f %f\n",a[0],a[1]);
+
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
