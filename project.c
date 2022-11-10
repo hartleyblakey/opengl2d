@@ -80,20 +80,28 @@ typedef struct Mesh
     GLuint VAO;
     unsigned int triangleCount;
     unsigned int instances;
+
 }Mesh;
 
 
-
-
-
-void Add_Attribute(Mesh mesh, void* data, unsigned long size, GLint vectorSize, GLenum type)
+void Init_Mesh(Mesh* mesh)
 {
-    mesh.attribCount ++;
-    VertexAttribute* newAttribs = malloc(sizeof(VertexAttribute) * mesh.attribCount + 1);
-    memcpy(newAttribs, mesh.attribs, sizeof(VertexAttribute) * (mesh.attribCount - 1));
-    free(mesh.attribs);
-    mesh.attribs = newAttribs;
+    mesh->attribCount = 0;
+    mesh->program = 0;
+    mesh->attribs = malloc(sizeof(VertexAttribute)+1);
+    mesh->triangleCount = 0;
+    mesh->instances = 1;
+}
 
+void Add_Attribute(Mesh* mesh, void* data, unsigned long size, GLint vectorSize, GLenum type)
+{
+    mesh->attribCount ++;
+    if(mesh->attribCount > 1){
+        VertexAttribute* newAttribs = malloc(sizeof(VertexAttribute) * mesh->attribCount + 1);
+        memcpy(newAttribs, mesh->attribs, sizeof(VertexAttribute) * (mesh->attribCount - 1));
+        free(mesh->attribs);
+        mesh->attribs = newAttribs;
+    }
 
     VertexAttribute r;
     r.vectorSize = vectorSize;
@@ -103,35 +111,35 @@ void Add_Attribute(Mesh mesh, void* data, unsigned long size, GLint vectorSize, 
     r.firstOffset = (void*)0;
     r.data = data;
     r.size = size;
-    newAttribs[mesh.attribCount-1] = r;
+    mesh->attribs[mesh->attribCount-1] = r;
 }
 
-void Init_VAO(Mesh mesh)
+void Init_VAO(Mesh* mesh)
 {
     int currentAttrib = 0;
-    GLuint* VBOs = malloc(sizeof(GLuint) * mesh.attribCount);
+    GLuint* VBOs = malloc(sizeof(GLuint) * mesh->attribCount);
 
-    glGenVertexArrays(1, &mesh.VAO);
-    glBindVertexArray(mesh.VAO);
+    glGenVertexArrays(1, &mesh->VAO);
+    glBindVertexArray(mesh->VAO);
 
-    for(int i = 0; i < mesh.attribCount; i++)
+    for(int i = 0; i < mesh->attribCount; i++)
     {
         glGenBuffers(1, &VBOs[i]);
         glBindBuffer(GL_ARRAY_BUFFER, VBOs[i]);
 
-        glBufferData(GL_ARRAY_BUFFER, mesh.attribs[i].size, mesh.attribs[i].data, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, mesh->attribs[i].size, mesh->attribs[i].data, GL_STATIC_DRAW);
 
         glVertexAttribPointer(
                               i,
-                              mesh.attribs[i].vectorSize,
-                              mesh.attribs[i].type,
-                              mesh.attribs[i].normalized,
-                              mesh.attribs[i].stride,
-                              mesh.attribs[i].firstOffset
+                              mesh->attribs[i].vectorSize,
+                              mesh->attribs[i].type,
+                              mesh->attribs[i].normalized,
+                              mesh->attribs[i].stride,
+                              mesh->attribs[i].firstOffset
                               );
 
         glEnableVertexAttribArray(i);
-        if(mesh.attribs[i].perInstance)
+        if(mesh->attribs[i].perInstance)
             glVertexAttribDivisor(i, 1);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
@@ -218,7 +226,7 @@ int main()
     Program shaderProgram = createSimpleProgram("Resources/Shaders/default");
 
 
-
+/*
     //create references to GPU objects
     GLuint VAO, VBO, EBO;
 
@@ -264,6 +272,14 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
     //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    */
+
+    Mesh mesh;
+    Init_Mesh(&mesh);
+
+    Add_Attribute(&mesh, vertices, sizeof(Vertex), 3, GL_FLOAT);
+
     glfwSwapBuffers(window);
 
 
