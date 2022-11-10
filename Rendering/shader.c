@@ -57,7 +57,7 @@ const char* parseShader(const char* file)
   //buffer[fileSize-1] = '\0';
   //printf("\n%s\n",buffer);
 
-
+  buffer[fileSize] = '\0';
 
   return (const char*)buffer;
 }
