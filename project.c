@@ -111,6 +111,7 @@ void Add_Attribute(Mesh* mesh, void* data, unsigned long size, GLint vectorSize,
     r.firstOffset = (void*)0;
     r.data = data;
     r.size = size;
+    r.perInstance = false;
     mesh->attribs[mesh->attribCount-1] = r;
 }
 
@@ -124,6 +125,8 @@ void Init_VAO(Mesh* mesh)
 
     for(int i = 0; i < mesh->attribCount; i++)
     {
+        if(mesh->attribs[i].perInstance = false)
+            mesh->triangleCount = mesh->attribs[i].size/(sizeof(mesh->attribs[i].type) * mesh->attribs[i].vectorSize);
         glGenBuffers(1, &VBOs[i]);
         glBindBuffer(GL_ARRAY_BUFFER, VBOs[i]);
 
@@ -274,11 +277,18 @@ int main()
     //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     */
-
+    //
     Mesh mesh;
     Init_Mesh(&mesh);
 
-    Add_Attribute(&mesh, vertices, sizeof(Vertex), 3, GL_FLOAT);
+    Add_Attribute(&mesh, vertices, sizeof(Vertex) * 6, 3, GL_FLOAT);
+    Add_Attribute(&mesh, positions[0], sizeof(float)* 16, 2, GL_FLOAT);
+    mesh.attribs[1].perInstance = true;
+
+
+    Init_VAO(&mesh);
+
+    printf("%i\n",mesh.triangleCount);
 
     glfwSwapBuffers(window);
 
@@ -290,19 +300,17 @@ int main()
     while(!glfwWindowShouldClose(window))
     {
 
-
-
         glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
      //use these verticies and attributes for the next draw calls
-        glBindVertexArray(VAO);
+        //glBindVertexArray(mesh.VAO);
 
         //use this shader program for the next draw calls
-        glUseProgram(shaderProgram);
+        //glUseProgram(shaderProgram);
 
-
+        draw(mesh);
         //draw the triangles
-        glDrawArraysInstanced(GL_TRIANGLES, 0, 6, 8);
+        //glDrawArraysInstanced(GL_TRIANGLES, 0, 6, 8);
 
         //swap the buffers, showing the drawn buffer on the screen
         glfwSwapBuffers(window);
@@ -311,10 +319,11 @@ int main()
         PERROR();
         checked = 1;
     }
+    /*
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
-
+    */
     glDeleteProgram(shaderProgram);
 
     glfwDestroyWindow(window);
