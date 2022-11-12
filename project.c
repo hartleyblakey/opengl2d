@@ -7,6 +7,7 @@
 
 
 #include "shader.h"
+#include "mesh.h"
 #include "cglm/cglm.h"
 //#include "vmath.h"
 //next tutorial: 4
@@ -37,126 +38,14 @@ Vertex New_Vertex(float x, float y, float z)
     return a;
 }
 
-unsigned int TOTAL_ERRORS = 0;
 
-void PERROR()
-{
-    GLenum err;
-    while((err = glGetError()) != GL_NO_ERROR)
-    {
-        // Process/log the error.
-        printf("OPENGL ERROR: %i\n", err);
-        TOTAL_ERRORS++;
-        if(TOTAL_ERRORS > 10)
-            exit(6);
-    }
-}
+
 
 typedef struct Player
 {
     vec2 position;
     int health;
 }Player;
-
-typedef struct VertexAttribute
-{
-    GLint vectorSize;
-    GLenum type;
-    GLboolean normalized;
-    int stride;
-    const void* firstOffset;
-    void* data;
-    unsigned long size;
-    bool perInstance;
-
-}VertexAttribute;
-//
-
-typedef struct Mesh
-{
-    unsigned int attribCount;
-    Program program;
-    VertexAttribute* attribs;
-    GLuint VAO;
-    unsigned int triangleCount;
-    unsigned int instances;
-
-}Mesh;
-
-
-void Init_Mesh(Mesh* mesh)
-{
-    mesh->attribCount = 0;
-    mesh->program = 0;
-    mesh->attribs = malloc(sizeof(VertexAttribute)+1);
-    mesh->triangleCount = 0;
-    mesh->instances = 1;
-}
-
-void Add_Attribute(Mesh* mesh, void* data, unsigned long size, GLint vectorSize, GLenum type)
-{
-    mesh->attribCount ++;
-    if(mesh->attribCount > 1){
-        VertexAttribute* newAttribs = malloc(sizeof(VertexAttribute) * mesh->attribCount + 0);
-        memcpy(newAttribs, mesh->attribs, sizeof(VertexAttribute) * (mesh->attribCount - 1));
-        free(mesh->attribs);
-        mesh->attribs = newAttribs;
-    }
-    printf("\nSizeof Type: %i\n",sizeof(type));
-    VertexAttribute r;
-    r.vectorSize = vectorSize;
-    r.type = type;
-    r.normalized = false;
-    r.stride = vectorSize * sizeof(type);
-    r.firstOffset = (void*)0;
-    r.data = data;
-    r.size = size;
-    r.perInstance = false;
-    mesh->attribs[mesh->attribCount-1] = r;
-}
-
-
-void Init_VAO(Mesh* mesh)
-{
-    int currentAttrib = 0;
-    GLuint* VBOs = malloc(sizeof(GLuint) * mesh->attribCount);
-
-    glGenVertexArrays(1, &(mesh->VAO));
-    glBindVertexArray(mesh->VAO);
-
-    for(int i = 0; i < mesh->attribCount; i++)
-    {
-        if(mesh->attribs[i].perInstance == false)
-            mesh->triangleCount = mesh->attribs[i].size/(sizeof(mesh->attribs[i].type) * mesh->attribs[i].vectorSize);
-        glGenBuffers(1, &VBOs[i]);
-        glBindBuffer(GL_ARRAY_BUFFER, VBOs[i]);
-
-        glBufferData(GL_ARRAY_BUFFER, mesh->attribs[i].size, mesh->attribs[i].data, GL_STATIC_DRAW);
-        glVertexAttribPointer(
-                              i,
-                              mesh->attribs[i].vectorSize,
-                              mesh->attribs[i].type,
-                              mesh->attribs[i].normalized,
-                              mesh->attribs[i].stride,
-                              mesh->attribs[i].firstOffset
-                              );
-        glEnableVertexAttribArray(i);
-        if(mesh->attribs[i].perInstance)
-            glVertexAttribDivisor(i, 1);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        PERROR();
-    }
-    glBindVertexArray(0);
-}
-
-void draw(Mesh* mesh)
-{
-    glBindVertexArray(mesh->VAO);
-    //use this shader program for the next draw calls
-    glUseProgram(mesh->program);
-    //draw the triangles
-    glDrawArraysInstanced(GL_TRIANGLES, 0, mesh->triangleCount * 3, mesh->instances);
-}
 
 
 int main()
@@ -188,25 +77,6 @@ int main()
         positions[i][1] = i;
     }
 
-
-    Vertex vertices[6];
-
-    vertices[0] = New_Vertex(-0.5f, -0.5f * sqrt(3.0f) / 3.0f, 0.0f);
-    vertices[1] = New_Vertex(0.5f, -0.5f * sqrt(3) / 3, 0.0f);
-    vertices[2] = New_Vertex(0.0f, 0.5f * sqrt(3) * 2 / 3, 0.0f);
-
-    vertices[3] = New_Vertex(-0.5f / 2, 0.5f * sqrt(3) / 6, 0.0f);
-    vertices[4] = New_Vertex(0.5f / 2, 0.5f * sqrt(3) / 6, 0.0f);
-    vertices[5] = New_Vertex(0.0f, -0.5f * sqrt(3) / 3, 0.0f);
-
-
-    GLuint indices[] =
-    {
-        0, 3, 5, // Lower left triangle
-        3, 2, 4, // Lower right triangle
-        5, 4, 1 // Upper triangle
-    };
-
     GLFWwindow* window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
     if (window == NULL)
     {
@@ -228,65 +98,14 @@ int main()
 
     Program shaderProgram = createSimpleProgram("Resources/Shaders/default");
 
-
-/*
-    //create references to GPU objects
-    GLuint VAO, VBO, EBO;
-
-    //create a vertex array and vertex buffer on the gpu
-    //and pass a reference to them to the corresponding variables
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-
-    //set this VAO as the active VAO
-    glBindVertexArray(VAO);
-
-    //set this VBO as the active VBO
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-    //pass the vertices to the GPU
-    glBufferData(GL_ARRAY_BUFFER, sizeof(square), square, GL_STATIC_DRAW);
-
-   // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    //glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    //tell the gpu:
-    //1. which vertex attribute slot the data from the currently bound VBO goes in
-    //2. how many values per vertex
-    //3. what datatype they are in
-    //4.
-    //5. amount of data between each vertex
-    //6. pointer to the start of the values in the array
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    GLuint positionData;
-    glGenBuffers(1, &positionData);
-    glBindBuffer(GL_ARRAY_BUFFER, positionData);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 16, positions[0], GL_STATIC_DRAW);
-
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribDivisor(1, 1);
-    //unbind the VAO and VBO for error checking, incase we accidentally call
-    //a function that modifes the currently bound VAO or VBO
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-    */
-    //
     Mesh mesh;
     Init_Mesh(&mesh);
 
-    Add_Attribute(&mesh, square, sizeof(Vertex) * 6, 3, GL_FLOAT);
-    Add_Attribute(&mesh, positions[0], sizeof(float)* 16, 2, GL_FLOAT);
+    Add_Vertex_VBO(&mesh, square, sizeof(Vertex) * 6, 3, GL_FLOAT);
+    Add_Instance_VBO(&mesh, positions[0], sizeof(float)* 16, 2, GL_FLOAT);
     mesh.instances = 8;
     mesh.program = shaderProgram;
-    mesh.attribs[1].perInstance = true;
-    Init_VAO(&mesh);
+    Build_VAO(&mesh);
 
     printf("\nTriangle Count: %u\n",mesh.triangleCount);
     printf("\nAttrib Count: %u\n",mesh.attribCount);

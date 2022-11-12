@@ -76,11 +76,22 @@ void printShaderCompilationErrors(Shader shader)
     free(buffer);
 
   }
+  else
+  {
+    GLint shaderType;
+    glGetShaderiv(shader,GL_SHADER_TYPE,&shaderType);
+    printf("\n");
+    if(shaderType ==      GL_FRAGMENT_SHADER) {printf("Fragment ");}
+    else if(shaderType == GL_VERTEX_SHADER)   {printf("Vertex ");}
+    else if(shaderType == GL_GEOMETRY_SHADER) {printf("Geometry ");}
+    else                                      {printf("Unknown ");}
+
+    printf("shader compiled successfully\n");
+  }
 }
 
 Program createProgram(char* vertex, char* fragment)
 {
-  printf("HERE?!\n");
   const char* fragSource = parseShader(fragment);
   const char* vertSource = parseShader(vertex);
 
@@ -88,11 +99,9 @@ Program createProgram(char* vertex, char* fragment)
   //printf("Vertex Shader:\n%s\n\n", vertSource);
 
   Shader vert = glCreateShader(GL_VERTEX_SHADER);
-  printf("Here?\n");
 
   glShaderSource(vert, 1, &vertSource, NULL);
   glCompileShader(vert);
-  printf("at least i made it here\n");
   printShaderCompilationErrors(vert);
 
 
@@ -141,7 +150,6 @@ Program createSimpleProgram(char* file)
   glShaderSource(vert, 1, &vertSource, NULL);
   glCompileShader(vert);
   printShaderCompilationErrors(vert);
-  printf("aa");
   Shader frag = glCreateShader(GL_FRAGMENT_SHADER);
   glShaderSource(frag, 1, &fragSource, NULL);
   glCompileShader(frag);
