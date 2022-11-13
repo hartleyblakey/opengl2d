@@ -45,11 +45,15 @@ typedef struct Mesh
     unsigned int uniformCount;
     unsigned int triangleCount;
     unsigned int instances;
+    unsigned int VBOCount;
+
     Program program;
     VertexAttribute* attribs;
     GLint* uniformLocations;
     const char** uniformNames;
     TYPE* uniformTypes;
+    GLuint* VBOs;
+
     GLuint VAO;
 
 }Mesh;
@@ -65,6 +69,8 @@ void Add_Uniform(Mesh* mesh, const char* name, TYPE type);
 void Update_Uniform(Mesh* mesh, const char* name, void* data);
 
 void Build_VAO(Mesh* mesh);
+
+void Update_VBO(Mesh* mesh, unsigned int index, void* data);
 
 void Draw(Mesh* mesh);
 

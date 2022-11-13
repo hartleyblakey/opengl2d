@@ -49,9 +49,22 @@ typedef struct Player
 
 void processInput(GLFWwindow* window, Player* player, float frameTime)
 {
+    float speed = 25.0;
     if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     {
-        player->position[1] += 10.0 * frameTime;
+        player->position[1] += speed * frameTime;
+    }
+    if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    {
+        player->position[0] -= speed * frameTime;
+    }
+    if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    {
+        player->position[1] -= speed * frameTime;
+    }
+    if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    {
+        player->position[0] += speed * frameTime;
     }
 }
 
@@ -80,8 +93,8 @@ int main()
 
     for(int i = 0; i < 8; i++)
     {
-        positions[i][0] = i;
-        positions[i][1] = i;
+        positions[i][0] = sin(i) * 100;
+        positions[i][1] = (i - 4) * 25;
     }
 
     positions[0][0] = player.position[0];
@@ -98,7 +111,7 @@ int main()
     colors[6] = 0xFF2F2FFF;
     colors[7] = 0xFF2F2FFF;
 
-    float sizes[8] = {5,10,15,20,5,24,2,6};
+    float sizes[8] = {5,3,3,3,3,3,3,3};
 
 
     GLFWwindow* window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
@@ -156,9 +169,22 @@ int main()
         Update_Uniform(&mesh,"uResolution", uResolution);
         Update_Uniform(&mesh,"uTime", &time);
 
+
         glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         processInput(window,&player,time-lastTime);
+
+
+
+        positions[0][0] = player.position[0];
+        positions[0][1] = player.position[1];
+        for(int i = 1; i < 8; i++)
+        {
+            positions[i][0] += glm_sign(-positions[i][0] + player.position[0]) * (time-lastTime) * 5;
+            positions[i][1] += glm_sign(-positions[i][1] + player.position[1]) * (time-lastTime) * 5;
+        }
+        Update_VBO(&mesh, 1, positions);
+
         Draw(&mesh);
 
         //swap the buffers, showing the drawn buffer on the screen

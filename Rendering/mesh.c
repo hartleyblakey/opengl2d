@@ -18,6 +18,7 @@ void Init_Mesh(Mesh* mesh)
 void Add_Vertex_VBO(Mesh* mesh, void* data, unsigned long size, GLint vectorSize, GLenum type)
 {
     mesh->attribCount ++;
+    mesh->VBOCount++;
     if(mesh->attribCount > 1){
         VertexAttribute* newAttribs = malloc(sizeof(VertexAttribute) * mesh->attribCount + 0);
         memcpy(newAttribs, mesh->attribs, sizeof(VertexAttribute) * (mesh->attribCount - 1));
@@ -41,6 +42,8 @@ void Add_Instance_VBO(Mesh* mesh, void* data, unsigned long size, GLint vectorSi
     Add_Vertex_VBO(mesh, data, size, vectorSize, type);
     mesh->attribs[mesh->attribCount-1].perInstance = true;
 }
+
+
 
 void Add_Uniform(Mesh* mesh, const char* name, TYPE type)
 {
@@ -146,7 +149,7 @@ void Update_Uniform(Mesh* mesh, const char* name, void* data)
 void Build_VAO(Mesh* mesh)
 {
     int currentAttrib = 0;
-    GLuint* VBOs = malloc(sizeof(GLuint) * mesh->attribCount);
+    mesh->VBOs = malloc(sizeof(GLuint) * mesh->attribCount);
 
     glGenVertexArrays(1, &(mesh->VAO));
     glBindVertexArray(mesh->VAO);
@@ -155,8 +158,8 @@ void Build_VAO(Mesh* mesh)
     {
         if(mesh->attribs[i].perInstance == false)
             mesh->triangleCount = mesh->attribs[i].size/(sizeof(mesh->attribs[i].type) * mesh->attribs[i].vectorSize);
-        glGenBuffers(1, &VBOs[i]);
-        glBindBuffer(GL_ARRAY_BUFFER, VBOs[i]);
+        glGenBuffers(1, &mesh->VBOs[i]);
+        glBindBuffer(GL_ARRAY_BUFFER, mesh->VBOs[i]);
 
         glBufferData(GL_ARRAY_BUFFER, mesh->attribs[i].size, mesh->attribs[i].data, GL_STATIC_DRAW);
         if(mesh->attribs[i].type == GL_INT || mesh->attribs[i].type == GL_UNSIGNED_INT)
@@ -188,7 +191,11 @@ void Build_VAO(Mesh* mesh)
     }
     glBindVertexArray(0);
 }
-
+void Update_VBO(Mesh* mesh, unsigned int index, void* data)
+{
+    glBindBuffer(GL_ARRAY_BUFFER, mesh->VBOs[index]);
+    glBufferData(GL_ARRAY_BUFFER, mesh->attribs[index].size, data, GL_STATIC_DRAW);
+}
 void Draw(Mesh* mesh)
 {
     glBindVertexArray(mesh->VAO);
