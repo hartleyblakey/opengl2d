@@ -47,6 +47,13 @@ typedef struct Player
     int health;
 }Player;
 
+void processInput(GLFWwindow* window, Player* player, float frameTime)
+{
+    if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    {
+        player->position[1] += 10.0 * frameTime;
+    }
+}
 
 int main()
 {
@@ -77,6 +84,23 @@ int main()
         positions[i][1] = i;
     }
 
+    positions[0][0] = player.position[0];
+    positions[0][1] = player.position[1];
+
+    unsigned int colors[8];
+
+    colors[0] = 0x2FFFFFFF;
+    colors[1] = 0xFF2F2FFF;
+    colors[2] = 0xFF2F2FFF;
+    colors[3] = 0xFF2F2FFF;
+    colors[4] = 0xFF2F2FFF;
+    colors[5] = 0xFF2F2FFF;
+    colors[6] = 0xFF2F2FFF;
+    colors[7] = 0xFF2F2FFF;
+
+    float sizes[8] = {5,10,15,20,5,24,2,6};
+
+
     GLFWwindow* window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
     if (window == NULL)
     {
@@ -103,6 +127,8 @@ int main()
 
     Add_Vertex_VBO(&mesh, square, sizeof(Vertex) * 6, 3, GL_FLOAT);
     Add_Instance_VBO(&mesh, positions[0], sizeof(float)* 16, 2, GL_FLOAT);
+    Add_Instance_VBO(&mesh, colors, 8 * sizeof(unsigned int), 1, GL_UNSIGNED_INT);
+    Add_Instance_VBO(&mesh, sizes, 8 * sizeof(float), 1, GL_FLOAT);
     mesh.instances = 8;
     mesh.program = shaderProgram;
     Build_VAO(&mesh);
@@ -110,27 +136,44 @@ int main()
     printf("\nTriangle Count: %u\n",mesh.triangleCount);
     printf("\nAttrib Count: %u\n",mesh.attribCount);
 
-    glfwSwapBuffers(window);
 
+    Add_Uniform(&mesh,"uResolution", IVEC2);
+    Add_Uniform(&mesh,"uTime", FLOAT);
+
+
+
+    glfwSwapBuffers(window);
+    float time = glfwGetTime();
+    float lastTime = time;
+    float fps = 0.0;
+    int passedFrames = 0;
     while(!glfwWindowShouldClose(window))
     {
+        passedFrames ++;
+        lastTime = time;
+        time = glfwGetTime();
+        int uResolution[2] = {WINDOWWIDTH,WINDOWHEIGHT};
+        Update_Uniform(&mesh,"uResolution", uResolution);
+        Update_Uniform(&mesh,"uTime", &time);
 
         glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-     //use these verticies and attributes for the next draw calls
-        glBindVertexArray(mesh.VAO);
-
-        //use this shader program for the next draw calls
-        //glUseProgram(shaderProgram);
-
-        draw(&mesh);
-        //draw the triangles
-        //glDrawArraysInstanced(GL_TRIANGLES, 0, 6, 8);
+        processInput(window,&player,time-lastTime);
+        Draw(&mesh);
 
         //swap the buffers, showing the drawn buffer on the screen
         glfwSwapBuffers(window);
 
         glfwPollEvents();
+        fps += (time-lastTime) * 1000.0;
+        if(floor(time) != floor(lastTime))
+        {
+            printf("%f\n",fps / ((float)passedFrames));
+            fps = 0;
+            passedFrames = 0;
+        }
+
+
         PERROR();
     }
     /*
@@ -139,7 +182,7 @@ int main()
     glDeleteBuffers(1, &EBO);
     */
     glDeleteProgram(shaderProgram);
-
+    Delete_Mesh(&mesh);
     glfwDestroyWindow(window);
     glfwTerminate();
     return 0;
