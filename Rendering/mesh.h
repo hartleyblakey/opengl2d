@@ -11,6 +11,7 @@
 #include "glerrors.h"
 #include "shader.h"
 #include "cglm/cglm.h"
+#include "texture.h"
 
 typedef enum {
     CHAR,
@@ -44,9 +45,11 @@ typedef struct Mesh
     unsigned int attribCount;
     unsigned int uniformCount;
     unsigned int triangleCount;
+    unsigned int textureCount;
     unsigned int instances;
     unsigned int VBOCount;
 
+    Texture boundTextures[16];
     Program program;
     VertexAttribute* attribs;
     GLint* uniformLocations;
@@ -67,6 +70,8 @@ void Add_Instance_VBO(Mesh* mesh, void* data, unsigned long size, GLint vectorSi
 void Add_Uniform(Mesh* mesh, const char* name, TYPE type);
 
 void Update_Uniform(Mesh* mesh, const char* name, void* data);
+
+void Add_Texture(Mesh* mesh, const char* name, Texture tex);
 
 void Build_VAO(Mesh* mesh);
 

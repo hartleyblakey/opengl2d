@@ -18,9 +18,11 @@ vec3 unpackColor(uint packedColor)
 }
 
 out vec3 color;
+out vec2 uv;
 
 void main()
 {
+   uv = aPos.xy * 0.5 + 0.5;
    vec3 pos = aPos;
    pos *= aSize;
 

@@ -9,6 +9,8 @@ void Init_Mesh(Mesh* mesh)
     mesh->triangleCount = 0;
     mesh->instances = 1;
 
+    mesh->textureCount = 0;
+
     mesh->uniformCount = 0;
     mesh->uniformLocations = malloc(sizeof(GLint)+1);
     mesh->uniformNames = malloc(sizeof(char*)+1);
@@ -102,6 +104,8 @@ bool sameString(const char* a,const char* b)
     return true;
 }
 
+
+
 void Update_Uniform(Mesh* mesh, const char* name, void* data)
 {
     int uniformLocation = -1;
@@ -145,6 +149,17 @@ void Update_Uniform(Mesh* mesh, const char* name, void* data)
     }
 }
 
+void Add_Texture(Mesh* mesh, const char* name, Texture tex)
+{
+    mesh->boundTextures[mesh->textureCount] = tex;
+
+
+    Add_Uniform(mesh, name, INT);
+    Update_Uniform(mesh, name, &mesh->textureCount);
+
+    mesh->textureCount++;
+
+}
 
 void Build_VAO(Mesh* mesh)
 {
@@ -189,6 +204,13 @@ void Build_VAO(Mesh* mesh)
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         PERROR();
     }
+
+    for(int i = 0; i < mesh->textureCount; i++)
+    {
+        glActiveTexture(GL_TEXTURE0 + i);
+        glBindTexture(GL_TEXTURE_2D, mesh->boundTextures[i].id);
+    }
+
     glBindVertexArray(0);
 }
 void Update_VBO(Mesh* mesh, unsigned int index, void* data)
@@ -218,3 +240,5 @@ void Delete_Mesh(Mesh* mesh)
 
 
 }
+
+

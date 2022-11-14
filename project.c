@@ -89,6 +89,8 @@ int main()
     square[3] = New_Vertex( 1,-1,0);
     square[4] = New_Vertex( 1, 1,0);
     square[5] = New_Vertex(-1, 1,0);
+
+
     vec2 positions[8];
 
     for(int i = 0; i < 8; i++)
@@ -102,19 +104,20 @@ int main()
 
     unsigned int colors[8];
 
-    colors[0] = 0x2FFFFFFF;
+    colors[0] = 0xFFFFFFFF;
     colors[1] = 0xFF2F2FFF;
     colors[2] = 0xFF2F2FFF;
     colors[3] = 0xFF2F2FFF;
     colors[4] = 0xFF2F2FFF;
-    colors[5] = 0xFF2F2FFF;
+    colors[5] = 0x00FF00FF;
     colors[6] = 0xFF2F2FFF;
     colors[7] = 0xFF2F2FFF;
 
-    float sizes[8] = {5,3,3,3,3,3,3,3};
+    float sizes[8] = {25,3,3,3,3,7,3,3};
+    //PERROR();
 
-
-    GLFWwindow* window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
+    printf("back to main\n");
+    GLFWwindow* window = glfwCreateWindow(800, 600, "Simple game project", NULL, NULL);
     if (window == NULL)
     {
         printf("failed to create window\n");
@@ -144,6 +147,10 @@ int main()
     Add_Instance_VBO(&mesh, sizes, 8 * sizeof(float), 1, GL_FLOAT);
     mesh.instances = 8;
     mesh.program = shaderProgram;
+
+    Texture frogTex = Upload_Texture_2D("/home/hartley/projects/opengl2d/Resources/Textures/frog4.png");
+    Add_Texture(&mesh,"frogTex",frogTex);
+
     Build_VAO(&mesh);
 
     printf("\nTriangle Count: %u\n",mesh.triangleCount);

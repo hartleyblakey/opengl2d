@@ -1,5 +1,5 @@
-headers := Rendering/shader.h Libraries/include/cglm/cglm.h Rendering/mesh.h Utils/glerrors.h
-source := project.c glad.c Rendering/shader.c Rendering/mesh.c Utils/glerrors.c
+headers := Rendering/shader.h Libraries/include/cglm/cglm.h Rendering/mesh.h Utils/glerrors.h Libraries/include/stb_image.h Rendering/texture.h
+source := project.c glad.c Rendering/shader.c Rendering/mesh.c Utils/glerrors.c Libraries/include/stb_image.c Rendering/texture.c
 shaders := Resources/Shaders/default.vert Resources/Shaders/default.frag
 
 project: $(source) $(headers) $(shaders)
