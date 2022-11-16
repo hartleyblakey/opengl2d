@@ -142,7 +142,7 @@ int main()
     Init_Mesh(&mesh);
 
     Add_Vertex_VBO(&mesh, square, sizeof(Vertex) * 6, 3, GL_FLOAT);
-    Add_Instance_VBO(&mesh, positions[0], sizeof(float)* 16, 2, GL_FLOAT);
+    Add_Instance_VBO(&mesh, &positions[0][0], sizeof(float)* 16, 2, GL_FLOAT);
     Add_Instance_VBO(&mesh, colors, 8 * sizeof(unsigned int), 1, GL_UNSIGNED_INT);
     Add_Instance_VBO(&mesh, sizes, 8 * sizeof(float), 1, GL_FLOAT);
     mesh.instances = 8;
@@ -160,7 +160,7 @@ int main()
     Add_Uniform(&mesh,"uResolution", IVEC2);
     Add_Uniform(&mesh,"uTime", FLOAT);
 
-
+//#define PRINTFPS
 
     glfwSwapBuffers(window);
     float time = glfwGetTime();
@@ -201,7 +201,9 @@ int main()
         fps += (time-lastTime) * 1000.0;
         if(floor(time) != floor(lastTime))
         {
+#ifdef PRINTFPS
             printf("%f\n",fps / ((float)passedFrames));
+#endif
             fps = 0;
             passedFrames = 0;
         }
