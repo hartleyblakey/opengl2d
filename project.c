@@ -20,7 +20,7 @@ float* ENEMYSIZES;
 unsigned int* ENEMYCOLORS;
 
 int ENEMYCOUNT = 0;
-const int ENEMYMAX = 200;
+const int ENEMYMAX = 2000;
 
 void initPositions()
 {
@@ -236,8 +236,15 @@ int main()
         for(int i = 1; i < ENEMYMAX; i++)
         {
             float speed = sin((float)i / 10.0) * 0.5 + 0.5 + 1.0;
+
             ENEMYPOSITIONS[i][0] += glm_sign(-ENEMYPOSITIONS[i][0] + player.position[0]) * (time-lastTime) * 5 * speed;
             ENEMYPOSITIONS[i][1] += glm_sign(-ENEMYPOSITIONS[i][1] + player.position[1]) * (time-lastTime) * 5*speed;
+
+            if(glm_vec2_distance(ENEMYPOSITIONS[i],player.position) < 5.0)
+            {
+                ENEMYPOSITIONS[i][0] = sin((float)i) * 300.0;
+                ENEMYPOSITIONS[i][1] = (300 * (float)i) / (float)ENEMYMAX - 150;
+            }
         }
 
         Update_VBO(&enemyMesh, 1, ENEMYPOSITIONS);

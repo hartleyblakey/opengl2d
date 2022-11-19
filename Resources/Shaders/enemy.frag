@@ -15,8 +15,8 @@ void main()
    vec3 col;
    col = color;
    vec4 tex = texture(frogTex,uv);
-   tex.a = clamp(distance(uv,vec2(0.5)),0.0,1.0);
-   if(tex.a > 0.5)
+   //tex.a = clamp(distance(uv,vec2(0.5)),0.0,1.0);
+   if(tex.a < 0.5)
    {
       discard;
       return;
