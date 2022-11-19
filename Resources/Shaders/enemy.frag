@@ -23,8 +23,8 @@ void main()
    }
   // if(tex.r < 0.5){discard;return;}
 
-   tex.rgb = mix(vec3(1.0,0.9,1.0),tex.rgb,((tex.a-0.3)/0.7));
+   //tex.rgb = mix(vec3(1.0,0.9,1.0),tex.rgb,((tex.a-0.3)/0.7));
 
-   col.rgb *= tex.rgb;
+   col.rgb = tex.rgb;
    FragColor = vec4(col, 1.0f);
 }

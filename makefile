@@ -4,8 +4,10 @@ headers :=
 source :=
 
 
-shaders := Resources/Shaders/default.vert \
-	   Resources/Shaders/default.frag
+shaders := Resources/Shaders/enemy.vert \
+	   Resources/Shaders/enemy.frag \
+	   Resources/Shaders/background.vert \
+	   Resources/Shaders/background.frag \
 
 
 hlibh := Libraries/include/cglm/cglm.h \

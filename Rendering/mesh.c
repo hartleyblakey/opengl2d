@@ -152,13 +152,14 @@ void Update_Uniform(Mesh* mesh, const char* name, void* data)
 void Add_Texture(Mesh* mesh, const char* name, Texture tex)
 {
     mesh->boundTextures[mesh->textureCount] = tex;
-
-
+    printf("%i\n",tex);
+    //glUseProgram(mesh->program);
     Add_Uniform(mesh, name, INT);
+
     Update_Uniform(mesh, name, &mesh->textureCount);
 
-    mesh->textureCount++;
 
+    mesh->textureCount++;
 }
 
 void Build_VAO(Mesh* mesh)
@@ -205,12 +206,6 @@ void Build_VAO(Mesh* mesh)
         PERROR();
     }
 
-    for(int i = 0; i < mesh->textureCount; i++)
-    {
-        glActiveTexture(GL_TEXTURE0 + i);
-        glBindTexture(GL_TEXTURE_2D, mesh->boundTextures[i].id);
-    }
-
     glBindVertexArray(0);
 }
 void Update_VBO(Mesh* mesh, unsigned int index, void* data)
@@ -221,6 +216,12 @@ void Update_VBO(Mesh* mesh, unsigned int index, void* data)
 void Draw(Mesh* mesh)
 {
     glBindVertexArray(mesh->VAO);
+
+    for(int i = 0; i < mesh->textureCount; i++)
+    {
+        glActiveTexture(GL_TEXTURE0 + i);
+        glBindTexture(GL_TEXTURE_2D, mesh->boundTextures[i].id);
+    }
     //use this shader program for the next draw calls
     glUseProgram(mesh->program);
     //draw the triangles
