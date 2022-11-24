@@ -21,7 +21,7 @@ hlibc := Libraries/include/stb_image.c \
 	 Rendering/shader.c
 
 
-hlibo :=  stb_image.o glad.o cglm.o shader.o mesh.o glerrors.o texture.o project.o
+hlibo :=  stb_image.o glad.o cglm.o shader.o mesh.o glerrors.o texture.o project.o common.o
 
 IFLAGS :=  -I./Libraries/include -I./Rendering -I./Utils
 
@@ -52,6 +52,9 @@ mesh.o: Rendering/mesh.h Rendering/mesh.c
 
 glerrors.o: Utils/glerrors.h Utils/glerrors.c
 	gcc -c -o glerrors.o Utils/glerrors.c $(IFLAGS) $(CFLAGS)
+
+common.o: Utils/common.h Utils/common.c
+	gcc -c -o common.o Utils/common.c $(IFLAGS) $(CFLAGS)
 
 texture.o: Rendering/texture.h Rendering/texture.c
 	gcc -c -o texture.o Rendering/texture.c $(IFLAGS) $(CFLAGS)
